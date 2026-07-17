@@ -61,6 +61,7 @@
   }
 
   .card {
+    position: relative;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 14px;
@@ -68,16 +69,21 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    text-decoration: none;
-    color: inherit;
     transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
   .card:hover,
-  .card:focus-visible {
+  .card:focus-within {
     transform: translateY(-4px);
     border-color: var(--accent);
     box-shadow: 0 10px 30px var(--accent-glow);
+  }
+
+  .card .site-link {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
   }
 
   .card h2 {
@@ -94,13 +100,29 @@
     flex-grow: 1;
   }
 
-  .card .link-label {
+  .card .site-hint {
     color: var(--accent);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
+  }
+
+  .card .repo-button {
+    position: relative;
+    z-index: 1;
+    align-self: flex-start;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.3rem 0.8rem;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .card .repo-button:hover,
+  .card .repo-button:focus-visible {
+    color: var(--accent);
+    border-color: var(--accent);
   }
 
   footer {
@@ -119,28 +141,34 @@
 <body>
 
 <header>
-  <h1><span>greenboy87</span></h1>
+  <h1><span>greenboy</span></h1>
   <p>Eine Übersicht meiner GitHub-Projekte</p>
 </header>
 
 <main>
-  <a class="card" href="https://github.com/greenboy87/musik-quiz" target="_blank" rel="noopener noreferrer">
-    <h2>musik-quiz</h2>
+  <div class="card">
+    <a class="site-link" href="https://greenboy87.github.io/musik-quiz/" target="_blank" rel="noopener noreferrer" aria-label="musik-quiz – Zur Seite"></a>
+    <h2>greenboys Scoreboard</h2>
     <p>Ein interaktives Quiz rund um Musik – Fragen erraten und Punkte sammeln.</p>
-    <span class="link-label">Zum Repository →</span>
-  </a>
+    <span class="site-hint">Zur Seite →</span>
+    <a class="repo-button" href="https://github.com/greenboy87/musik-quiz" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
+  </div>
 
-  <a class="card" href="https://github.com/greenboy87/greenboy" target="_blank" rel="noopener noreferrer">
+  <div class="card">
+    <a class="site-link" href="https://greenboy87.github.io/greenboy/" target="_blank" rel="noopener noreferrer" aria-label="greenboy – Zur Seite"></a>
     <h2>greenboy</h2>
     <p>Mein persönliches Projekt-Repository mit verschiedenen Experimenten und Tools.</p>
-    <span class="link-label">Zum Repository →</span>
-  </a>
+    <span class="site-hint">Zur Seite →</span>
+    <a class="repo-button" href="https://github.com/greenboy87/greenboy" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
+  </div>
 
-  <a class="card" href="https://github.com/greenboy87/telekom-rechner" target="_blank" rel="noopener noreferrer">
+  <div class="card">
+    <a class="site-link" href="https://greenboy87.github.io/telekom-rechner/" target="_blank" rel="noopener noreferrer" aria-label="telekom-rechner – Zur Seite"></a>
     <h2>telekom-rechner</h2>
     <p>Ein kleiner Rechner rund um Telekom-Tarife und Kosten.</p>
-    <span class="link-label">Zum Repository →</span>
-  </a>
+    <span class="site-hint">Zur Seite →</span>
+    <a class="repo-button" href="https://github.com/greenboy87/telekom-rechner" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
+  </div>
 </main>
 
 <footer>
