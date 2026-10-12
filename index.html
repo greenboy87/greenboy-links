@@ -125,6 +125,125 @@
     border-color: var(--accent);
   }
 
+  /* Werkzeugleiste */
+  .toolbar {
+    width: 100%;
+    max-width: 960px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .toolbar button {
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.4rem 0.9rem;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .toolbar button:hover,
+  .toolbar button:focus-visible,
+  .toolbar button[aria-pressed="true"] {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .toolbar .reset-button {
+    display: none;
+  }
+
+  body.editing .toolbar .reset-button {
+    display: inline-block;
+  }
+
+  /* Kompakte Ansicht */
+  body.compact main {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.75rem;
+  }
+
+  body.compact .card {
+    padding: 0.9rem 1rem;
+    gap: 0.4rem;
+    border-radius: 10px;
+  }
+
+  body.compact .card h2 {
+    font-size: 1rem;
+  }
+
+  body.compact .card p,
+  body.compact .card .site-hint {
+    display: none;
+  }
+
+  body.compact .card .repo-button {
+    font-size: 0.72rem;
+    padding: 0.2rem 0.6rem;
+  }
+
+  /* Anordnen-Modus */
+  .move-controls {
+    display: none;
+    position: relative;
+    z-index: 2;
+    gap: 0.4rem;
+  }
+
+  .move-controls button {
+    background: var(--bg);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  .move-controls button:hover,
+  .move-controls button:focus-visible {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  body.editing .move-controls {
+    display: flex;
+  }
+
+  body.editing .card {
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    border-style: dashed;
+  }
+
+  body.editing .card .site-link,
+  body.editing .card .repo-button {
+    pointer-events: none;
+  }
+
+  body.editing .card:hover {
+    transform: none;
+  }
+
+  .card.dragging {
+    cursor: grabbing;
+    z-index: 10;
+    border-color: var(--accent);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    transition: none;
+    opacity: 0.95;
+  }
+
   footer {
     margin-top: 3rem;
     color: var(--text-muted);
@@ -145,8 +264,14 @@
   <p>Eine Übersicht meiner GitHub-Projekte</p>
 </header>
 
+<div class="toolbar">
+  <button type="button" class="compact-button" aria-pressed="false">Kompakt</button>
+  <button type="button" class="edit-button" aria-pressed="false">Anordnen</button>
+  <button type="button" class="reset-button">Reihenfolge zurücksetzen</button>
+</div>
+
 <main>
-  <div class="card">
+  <div class="card" data-id="musik-quiz">
     <a class="site-link" href="https://greenboy87.github.io/musik-quiz/" target="_blank" rel="noopener noreferrer" aria-label="musik-quiz – Zur Seite"></a>
     <h2>greenboys Scoreboard</h2>
     <p>Ein interaktives Quiz rund um Musik – Fragen erraten und Punkte sammeln.</p>
@@ -154,7 +279,7 @@
     <a class="repo-button" href="https://github.com/greenboy87/musik-quiz" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
   </div>
 
-  <div class="card">
+  <div class="card" data-id="greenboy">
     <a class="site-link" href="https://greenboy87.github.io/greenboy/" target="_blank" rel="noopener noreferrer" aria-label="greenboy – Zur Seite"></a>
     <h2>greenboy</h2>
     <p>Mein persönliches Projekt-Repository mit verschiedenen Experimenten und Tools.</p>
@@ -162,7 +287,7 @@
     <a class="repo-button" href="https://github.com/greenboy87/greenboy" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
   </div>
 
-  <div class="card">
+  <div class="card" data-id="telekom-rechner">
     <a class="site-link" href="https://greenboy87.github.io/telekom-rechner/" target="_blank" rel="noopener noreferrer" aria-label="telekom-rechner – Zur Seite"></a>
     <h2>telekom-rechner</h2>
     <p>Ein kleiner Rechner rund um Telekom-Tarife und Kosten.</p>
@@ -170,7 +295,7 @@
     <a class="repo-button" href="https://github.com/greenboy87/telekom-rechner" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
   </div>
 
-  <div class="card">
+  <div class="card" data-id="greenboy-learning">
     <a class="site-link" href="https://greenboy87.github.io/greenboy-learning/" target="_blank" rel="noopener noreferrer" aria-label="Klangwelt – Zur Seite"></a>
     <h2>🎵 Klangwelt</h2>
     <p>Musik interaktiv lernen – Übungen und Spiele rund um Klang und Gehörbildung.</p>
@@ -178,7 +303,7 @@
     <a class="repo-button" href="https://github.com/greenboy87/greenboy-learning" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
   </div>
 
-  <div class="card">
+  <div class="card" data-id="feedback-admin">
     <a class="site-link" href="https://greenboy87.github.io/feedback/admin.html" target="_blank" rel="noopener noreferrer" aria-label="Feedback Lehrkraft-Ansicht – Zur Seite"></a>
     <h2>📋 Feedback – Lehrkraft-Ansicht</h2>
     <p>Verwaltungsseite für Lehrkräfte zum Freischalten und Einsehen von Feedback.</p>
@@ -186,7 +311,7 @@
     <a class="repo-button" href="https://github.com/greenboy87/feedback" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
   </div>
 
-  <div class="card">
+  <div class="card" data-id="school-tool">
     <a class="site-link" href="https://greenboy87.github.io/school-tool/" target="_blank" rel="noopener noreferrer" aria-label="Lehrer-Tool – Zur Seite"></a>
     <h2>🧑‍🏫 Lehrer-Tool</h2>
     <p>Lärmampel, Klassen- und Notenverwaltung, Sitzplan und Klassenlisten-Import – alles direkt im Browser.</p>
@@ -194,7 +319,7 @@
     <a class="repo-button" href="https://github.com/greenboy87/school-tool" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
   </div>
 
-  <div class="card">
+  <div class="card" data-id="rhythmus-werkstatt">
     <a class="site-link" href="https://greenboy87.github.io/rhythmus-werkstatt/" target="_blank" rel="noopener noreferrer" aria-label="Rhythmus-Werkstatt – Zur Seite"></a>
     <h2>🥁 Rhythmus-Werkstatt</h2>
     <p>Werkzeug für den Rhythmus-Unterricht – Takte bauen, vorklatschen, Übungen erzeugen, Arbeitsblätter drucken.</p>
@@ -202,7 +327,7 @@
     <a class="repo-button" href="https://github.com/greenboy87/rhythmus-werkstatt" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
   </div>
 
-  <div class="card">
+  <div class="card" data-id="metronom">
     <a class="site-link" href="https://greenboy87.github.io/metronom/" target="_blank" rel="noopener noreferrer" aria-label="Metronom – Zur Seite"></a>
     <h2>⏱️ Metronom</h2>
     <p>Metronom für Schüler – Tempo am Drehrad oder per Tippen, Betonung je Schlag, Unterteilungen, Tempo-Trainer und stille Takte.</p>
@@ -210,7 +335,7 @@
     <a class="repo-button" href="https://github.com/greenboy87/metronom" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
   </div>
 
-  <div class="card">
+  <div class="card" data-id="digitale-ex">
     <a class="site-link" href="https://greenboy87.github.io/school-tool/ex.html" target="_blank" rel="noopener noreferrer" aria-label="Digitale Ex – Zur Seite"></a>
     <h2>✏️ Digitale Ex</h2>
     <p>Schülerseite für digitale Exen auf dem iPad – Code von der Leinwand eingeben, Nummer wählen, auf Freigabe warten, Ex schreiben.</p>
@@ -218,7 +343,7 @@
     <a class="repo-button" href="https://github.com/greenboy87/school-tool" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
   </div>
 
-  <div class="card">
+  <div class="card" data-id="beat-vault">
     <a class="site-link" href="https://beat-vault.pages.dev/" target="_blank" rel="noopener noreferrer" aria-label="Beat Vault – Zur Seite"></a>
     <h2>🎮 Beat Vault</h2>
     <p>Übungsseite für Luke und Linus – Noten, Playalongs und Aufgaben für Klavier und Schlagzeug, mit täglicher Schatzkiste und Münz-Tresor. Mit Familien-Login.</p>
@@ -229,6 +354,141 @@
 <footer>
   <p>&copy; 2026 greenboy87 · Gehostet auf <a href="https://pages.github.com/" target="_blank" rel="noopener noreferrer">GitHub Pages</a></p>
 </footer>
+
+<script>
+(function () {
+  const ORDER_KEY = 'greenboy-links:reihenfolge';
+  const COMPACT_KEY = 'greenboy-links:kompakt';
+  const main = document.querySelector('main');
+  const compactButton = document.querySelector('.compact-button');
+  const editButton = document.querySelector('.edit-button');
+  const resetButton = document.querySelector('.reset-button');
+  const cards = () => Array.from(main.querySelectorAll('.card'));
+  const originalOrder = cards().map(c => c.dataset.id);
+
+  function load(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  }
+  function save(key, value) {
+    try {
+      if (value === null) localStorage.removeItem(key);
+      else localStorage.setItem(key, value);
+    } catch (e) { /* ohne Speicher geht es trotzdem */ }
+  }
+
+  // Gespeicherte Reihenfolge anwenden; neue Karten bleiben hinten
+  function applyOrder(ids) {
+    const byId = new Map(cards().map(c => [c.dataset.id, c]));
+    ids.forEach(id => {
+      const card = byId.get(id);
+      if (card) { main.appendChild(card); byId.delete(id); }
+    });
+    byId.forEach(card => main.appendChild(card));
+  }
+  function saveOrder() {
+    save(ORDER_KEY, JSON.stringify(cards().map(c => c.dataset.id)));
+  }
+  try {
+    const saved = JSON.parse(load(ORDER_KEY));
+    if (Array.isArray(saved)) applyOrder(saved);
+  } catch (e) { /* ungültiger Eintrag */ }
+
+  // Kompakte Ansicht
+  function setCompact(on) {
+    document.body.classList.toggle('compact', on);
+    compactButton.setAttribute('aria-pressed', String(on));
+    save(COMPACT_KEY, on ? '1' : null);
+  }
+  setCompact(load(COMPACT_KEY) === '1');
+  compactButton.addEventListener('click', () => {
+    setCompact(!document.body.classList.contains('compact'));
+  });
+
+  // Pfeil-Knöpfe in jede Karte (auch für Tastatur)
+  cards().forEach(card => {
+    const name = card.querySelector('h2').textContent.trim();
+    const controls = document.createElement('div');
+    controls.className = 'move-controls';
+    controls.innerHTML =
+      '<button type="button" data-dir="-1" aria-label="' + name + ' nach vorne">←</button>' +
+      '<button type="button" data-dir="1" aria-label="' + name + ' nach hinten">→</button>';
+    card.insertBefore(controls, card.firstChild);
+  });
+  main.addEventListener('click', e => {
+    const btn = e.target.closest('.move-controls button');
+    if (!btn) return;
+    const card = btn.closest('.card');
+    if (btn.dataset.dir === '-1' && card.previousElementSibling) {
+      main.insertBefore(card, card.previousElementSibling);
+    } else if (btn.dataset.dir === '1' && card.nextElementSibling) {
+      main.insertBefore(card.nextElementSibling, card);
+    }
+    btn.focus();
+    saveOrder();
+  });
+
+  // Anordnen-Modus
+  function setEditing(on) {
+    document.body.classList.toggle('editing', on);
+    editButton.setAttribute('aria-pressed', String(on));
+    editButton.textContent = on ? 'Fertig' : 'Anordnen';
+  }
+  editButton.addEventListener('click', () => {
+    setEditing(!document.body.classList.contains('editing'));
+  });
+  resetButton.addEventListener('click', () => {
+    applyOrder(originalOrder);
+    save(ORDER_KEY, null);
+  });
+
+  // Ziehen mit Maus, Finger oder Stift
+  let drag = null;
+
+  main.addEventListener('pointerdown', e => {
+    if (!document.body.classList.contains('editing')) return;
+    if (e.target.closest('.move-controls')) return;
+    const card = e.target.closest('.card');
+    if (!card || e.button > 0) return;
+    const rect = card.getBoundingClientRect();
+    drag = { card, pointerId: e.pointerId, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top };
+    card.setPointerCapture(e.pointerId);
+    card.classList.add('dragging');
+    e.preventDefault();
+  });
+
+  function follow(x, y) {
+    const { card, offsetX, offsetY } = drag;
+    card.style.transform = '';
+    const rect = card.getBoundingClientRect();
+    card.style.transform = 'translate(' + (x - offsetX - rect.left) + 'px,' + (y - offsetY - rect.top) + 'px)';
+  }
+
+  main.addEventListener('pointermove', e => {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    const { card } = drag;
+    card.style.visibility = 'hidden';
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    card.style.visibility = '';
+    const target = under && under.closest('.card');
+    if (target && target !== card && target.parentNode === main) {
+      const list = cards();
+      if (list.indexOf(target) < list.indexOf(card)) main.insertBefore(card, target);
+      else main.insertBefore(card, target.nextElementSibling);
+    }
+    follow(e.clientX, e.clientY);
+  });
+
+  function endDrag(e) {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    drag.card.classList.remove('dragging');
+    drag.card.style.transform = '';
+    drag = null;
+    saveOrder();
+  }
+  main.addEventListener('pointerup', endDrag);
+  main.addEventListener('pointercancel', endDrag);
+})();
+</script>
 
 </body>
 </html>
