@@ -155,14 +155,6 @@
     border-color: var(--accent);
   }
 
-  .toolbar .reset-button {
-    display: none;
-  }
-
-  body.editing .toolbar .reset-button {
-    display: inline-block;
-  }
-
   /* Kompakte Ansicht */
   body.compact main {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -189,50 +181,12 @@
     padding: 0.2rem 0.6rem;
   }
 
-  /* Anordnen-Modus */
-  .move-controls {
-    display: none;
-    position: relative;
-    z-index: 2;
-    gap: 0.4rem;
-  }
-
-  .move-controls button {
-    background: var(--bg);
-    color: var(--text-muted);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    width: 2rem;
-    height: 2rem;
-    font-size: 1rem;
-    cursor: pointer;
-  }
-
-  .move-controls button:hover,
-  .move-controls button:focus-visible {
-    color: var(--accent);
-    border-color: var(--accent);
-  }
-
-  body.editing .move-controls {
-    display: flex;
-  }
-
-  body.editing .card {
+  /* Ziehen */
+  .card {
     cursor: grab;
-    touch-action: none;
-    user-select: none;
     -webkit-user-select: none;
-    border-style: dashed;
-  }
-
-  body.editing .card .site-link,
-  body.editing .card .repo-button {
-    pointer-events: none;
-  }
-
-  body.editing .card:hover {
-    transform: none;
+    user-select: none;
+    -webkit-touch-callout: none;
   }
 
   .card.dragging {
@@ -242,6 +196,15 @@
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
     transition: none;
     opacity: 0.95;
+  }
+
+  .card.dragging .site-link,
+  .card.dragging .repo-button {
+    pointer-events: none;
+  }
+
+  body.drag-active {
+    cursor: grabbing;
   }
 
   footer {
@@ -266,8 +229,6 @@
 
 <div class="toolbar">
   <button type="button" class="compact-button" aria-pressed="false">Kompakt</button>
-  <button type="button" class="edit-button" aria-pressed="false">Anordnen</button>
-  <button type="button" class="reset-button">Reihenfolge zurücksetzen</button>
 </div>
 
 <main>
@@ -335,14 +296,6 @@
     <a class="repo-button" href="https://github.com/greenboy87/metronom" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
   </div>
 
-  <div class="card" data-id="digitale-ex">
-    <a class="site-link" href="https://greenboy87.github.io/school-tool/ex.html" target="_blank" rel="noopener noreferrer" aria-label="Digitale Ex – Zur Seite"></a>
-    <h2>✏️ Digitale Ex</h2>
-    <p>Schülerseite für digitale Exen auf dem iPad – Code von der Leinwand eingeben, Nummer wählen, auf Freigabe warten, Ex schreiben.</p>
-    <span class="site-hint">Zur Seite →</span>
-    <a class="repo-button" href="https://github.com/greenboy87/school-tool" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
-  </div>
-
   <div class="card" data-id="beat-vault">
     <a class="site-link" href="https://beat-vault.pages.dev/" target="_blank" rel="noopener noreferrer" aria-label="Beat Vault – Zur Seite"></a>
     <h2>🎮 Beat Vault</h2>
@@ -361,10 +314,7 @@
   const COMPACT_KEY = 'greenboy-links:kompakt';
   const main = document.querySelector('main');
   const compactButton = document.querySelector('.compact-button');
-  const editButton = document.querySelector('.edit-button');
-  const resetButton = document.querySelector('.reset-button');
   const cards = () => Array.from(main.querySelectorAll('.card'));
-  const originalOrder = cards().map(c => c.dataset.id);
 
   function load(key) {
     try { return localStorage.getItem(key); } catch (e) { return null; }
@@ -377,20 +327,16 @@
   }
 
   // Gespeicherte Reihenfolge anwenden; neue Karten bleiben hinten
-  function applyOrder(ids) {
-    const byId = new Map(cards().map(c => [c.dataset.id, c]));
-    ids.forEach(id => {
-      const card = byId.get(id);
-      if (card) { main.appendChild(card); byId.delete(id); }
-    });
-    byId.forEach(card => main.appendChild(card));
-  }
-  function saveOrder() {
-    save(ORDER_KEY, JSON.stringify(cards().map(c => c.dataset.id)));
-  }
   try {
     const saved = JSON.parse(load(ORDER_KEY));
-    if (Array.isArray(saved)) applyOrder(saved);
+    if (Array.isArray(saved)) {
+      const byId = new Map(cards().map(c => [c.dataset.id, c]));
+      saved.forEach(id => {
+        const card = byId.get(id);
+        if (card) { main.appendChild(card); byId.delete(id); }
+      });
+      byId.forEach(card => main.appendChild(card));
+    }
   } catch (e) { /* ungültiger Eintrag */ }
 
   // Kompakte Ansicht
@@ -404,68 +350,59 @@
     setCompact(!document.body.classList.contains('compact'));
   });
 
-  // Pfeil-Knöpfe in jede Karte (auch für Tastatur)
-  cards().forEach(card => {
-    const name = card.querySelector('h2').textContent.trim();
-    const controls = document.createElement('div');
-    controls.className = 'move-controls';
-    controls.innerHTML =
-      '<button type="button" data-dir="-1" aria-label="' + name + ' nach vorne">←</button>' +
-      '<button type="button" data-dir="1" aria-label="' + name + ' nach hinten">→</button>';
-    card.insertBefore(controls, card.firstChild);
-  });
-  main.addEventListener('click', e => {
-    const btn = e.target.closest('.move-controls button');
-    if (!btn) return;
-    const card = btn.closest('.card');
-    if (btn.dataset.dir === '-1' && card.previousElementSibling) {
-      main.insertBefore(card, card.previousElementSibling);
-    } else if (btn.dataset.dir === '1' && card.nextElementSibling) {
-      main.insertBefore(card.nextElementSibling, card);
-    }
-    btn.focus();
-    saveOrder();
-  });
+  // Ziehen: Maus ab ein paar Pixeln Bewegung, Finger nach kurzem Gedrückthalten
+  const MOVE_THRESHOLD = 6;
+  const LONG_PRESS_MS = 300;
+  let press = null;
+  let suppressClick = false;
 
-  // Anordnen-Modus
-  function setEditing(on) {
-    document.body.classList.toggle('editing', on);
-    editButton.setAttribute('aria-pressed', String(on));
-    editButton.textContent = on ? 'Fertig' : 'Anordnen';
-  }
-  editButton.addEventListener('click', () => {
-    setEditing(!document.body.classList.contains('editing'));
-  });
-  resetButton.addEventListener('click', () => {
-    applyOrder(originalOrder);
-    save(ORDER_KEY, null);
-  });
-
-  // Ziehen mit Maus, Finger oder Stift
-  let drag = null;
+  main.addEventListener('dragstart', e => e.preventDefault());
 
   main.addEventListener('pointerdown', e => {
-    if (!document.body.classList.contains('editing')) return;
-    if (e.target.closest('.move-controls')) return;
     const card = e.target.closest('.card');
     if (!card || e.button > 0) return;
     const rect = card.getBoundingClientRect();
-    drag = { card, pointerId: e.pointerId, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top };
-    card.setPointerCapture(e.pointerId);
-    card.classList.add('dragging');
-    e.preventDefault();
+    press = {
+      card, pointerId: e.pointerId, touch: e.pointerType === 'touch',
+      startX: e.clientX, startY: e.clientY,
+      offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top,
+      dragging: false, timer: null
+    };
+    if (press.touch) {
+      press.timer = setTimeout(() => startDrag(press.startX, press.startY), LONG_PRESS_MS);
+    }
   });
 
+  function startDrag(x, y) {
+    if (!press || press.dragging) return;
+    press.dragging = true;
+    press.card.classList.add('dragging');
+    document.body.classList.add('drag-active');
+    try { press.card.setPointerCapture(press.pointerId); } catch (e) { /* Zeiger schon weg */ }
+    if (press.touch && navigator.vibrate) navigator.vibrate(15);
+    follow(x, y);
+  }
+
   function follow(x, y) {
-    const { card, offsetX, offsetY } = drag;
+    const { card, offsetX, offsetY } = press;
     card.style.transform = '';
     const rect = card.getBoundingClientRect();
     card.style.transform = 'translate(' + (x - offsetX - rect.left) + 'px,' + (y - offsetY - rect.top) + 'px)';
   }
 
   main.addEventListener('pointermove', e => {
-    if (!drag || e.pointerId !== drag.pointerId) return;
-    const { card } = drag;
+    if (!press || e.pointerId !== press.pointerId) return;
+    const moved = Math.hypot(e.clientX - press.startX, e.clientY - press.startY);
+    if (!press.dragging) {
+      if (press.touch) {
+        // Finger bewegt sich vor dem Gedrückthalten: das ist Scrollen
+        if (moved > MOVE_THRESHOLD * 2) { clearTimeout(press.timer); press = null; }
+        return;
+      }
+      if (moved < MOVE_THRESHOLD) return;
+      startDrag(e.clientX, e.clientY);
+    }
+    const { card } = press;
     card.style.visibility = 'hidden';
     const under = document.elementFromPoint(e.clientX, e.clientY);
     card.style.visibility = '';
@@ -478,15 +415,34 @@
     follow(e.clientX, e.clientY);
   });
 
-  function endDrag(e) {
-    if (!drag || e.pointerId !== drag.pointerId) return;
-    drag.card.classList.remove('dragging');
-    drag.card.style.transform = '';
-    drag = null;
-    saveOrder();
+  function endPress(e) {
+    if (!press || e.pointerId !== press.pointerId) return;
+    clearTimeout(press.timer);
+    if (press.dragging) {
+      press.card.classList.remove('dragging');
+      press.card.style.transform = '';
+      document.body.classList.remove('drag-active');
+      save(ORDER_KEY, JSON.stringify(cards().map(c => c.dataset.id)));
+      suppressClick = true;
+      setTimeout(() => { suppressClick = false; }, 100);
+    }
+    press = null;
   }
-  main.addEventListener('pointerup', endDrag);
-  main.addEventListener('pointercancel', endDrag);
+  main.addEventListener('pointerup', endPress);
+  main.addEventListener('pointercancel', endPress);
+
+  // Nach dem Ziehen nicht versehentlich den Link öffnen
+  main.addEventListener('click', e => {
+    if (suppressClick) { e.preventDefault(); e.stopPropagation(); suppressClick = false; }
+  }, true);
+
+  // Während des Ziehens nicht scrollen und kein Kontextmenü
+  document.addEventListener('touchmove', e => {
+    if (press && press.dragging) e.preventDefault();
+  }, { passive: false });
+  main.addEventListener('contextmenu', e => {
+    if (press) e.preventDefault();
+  });
 })();
 </script>
 
