@@ -155,6 +155,41 @@
     border-color: var(--accent);
   }
 
+  /* Reiter: Projekte / Klassenspiele */
+  .tabs {
+    display: flex;
+    gap: 0.4rem;
+    margin-right: auto;
+  }
+
+  .toolbar .tabs button {
+    font-size: 0.95rem;
+    padding: 0.5rem 1.1rem;
+  }
+
+  .toolbar .tabs button[aria-selected="true"] {
+    color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .tabs .anzahl {
+    opacity: 0.7;
+    margin-left: 0.25rem;
+  }
+
+  .tab-info {
+    width: 100%;
+    max-width: 960px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: -0.25rem 0 1rem;
+  }
+
+  .card[hidden], .tab-info[hidden] {
+    display: none;
+  }
+
   /* Kompakte Ansicht */
   body.compact main {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -228,8 +263,13 @@
 </header>
 
 <div class="toolbar">
+  <div class="tabs" role="tablist" aria-label="Bereiche">
+    <button type="button" role="tab" data-tab="projekte" aria-selected="true">🧰 Projekte<span class="anzahl"></span></button>
+    <button type="button" role="tab" data-tab="klassenspiele" aria-selected="false">🎮 Klassenspiele<span class="anzahl"></span></button>
+  </div>
   <button type="button" class="compact-button" aria-pressed="false">Kompakt</button>
 </div>
+<p class="tab-info" data-info="klassenspiele" hidden>Spiele für die ganze Klasse: Der Beamer zeigt einen QR-Code, die Kinder spielen am iPad oder Handy mit und sammeln Punkte.</p>
 
 <main>
   <div class="card" data-id="musik-quiz">
@@ -312,12 +352,28 @@
     <a class="repo-button" href="https://github.com/greenboy87/metronom" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
   </div>
 
-  <div class="card" data-id="metrum-spiel">
+  <div class="card" data-id="metrum-spiel" data-gruppe="klassenspiele">
     <a class="site-link" href="https://greenboy87.github.io/metrum-spiel/" target="_blank" rel="noopener noreferrer" aria-label="Metrum-Challenge – Zur Seite"></a>
     <h2>🏆 Metrum-Challenge</h2>
     <p>Klassenspiel mit QR-Code zu Metrum und Tempo – Tempo tippen, Metronom-Millionär und Vor- &amp; Nachmachen, mit Punkten und Endstand.</p>
     <span class="site-hint">Zur Seite →</span>
     <a class="repo-button" href="https://github.com/greenboy87/metrum-spiel" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
+  </div>
+
+  <div class="card" data-id="taktarten-spiel" data-gruppe="klassenspiele">
+    <a class="site-link" href="https://greenboy87.github.io/taktarten-spiel/" target="_blank" rel="noopener noreferrer" aria-label="Taktarten-Challenge – Zur Seite"></a>
+    <h2>🎼 Taktarten-Challenge</h2>
+    <p>Klassenspiel mit QR-Code zu den Taktarten – Taktart hören, Taktstriche setzen, Taktart eintragen, fehlende Noten, Notenkobold und Millionär.</p>
+    <span class="site-hint">Zur Seite →</span>
+    <a class="repo-button" href="https://github.com/greenboy87/taktarten-spiel" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
+  </div>
+
+  <div class="card" data-id="rhythmus-klassenspiel" data-gruppe="klassenspiele">
+    <a class="site-link" href="https://greenboy87.github.io/rhythmus-werkstatt/klasse.html" target="_blank" rel="noopener noreferrer" aria-label="Rhythmus-Klassenspiel – Zur Seite"></a>
+    <h2>🥁 Rhythmus-Klassenspiel</h2>
+    <p>Rhythmen hören und nachbauen – die ganze Klasse spielt per QR-Code mit, aus der Rhythmus-Werkstatt.</p>
+    <span class="site-hint">Zur Seite →</span>
+    <a class="repo-button" href="https://github.com/greenboy87/rhythmus-werkstatt" target="_blank" rel="noopener noreferrer">GitHub-Repository</a>
   </div>
 
   <div class="card" data-id="beat-vault">
@@ -362,6 +418,28 @@
       byId.forEach(card => main.appendChild(card));
     }
   } catch (e) { /* ungültiger Eintrag */ }
+
+  // Reiter: Karten ohne data-gruppe gehören zu "Projekte". Neue Klassenspiele
+  // bekommen data-gruppe="klassenspiele". Direktlink: …/greenboy-links/#klassenspiele
+  const TAB_KEY = 'greenboy-links:reiter';
+  const tabButtons = Array.from(document.querySelectorAll('[data-tab]'));
+  const gruppe = card => card.dataset.gruppe || 'projekte';
+  tabButtons.forEach(b => {
+    b.querySelector('.anzahl').textContent = cards().filter(c => gruppe(c) === b.dataset.tab).length;
+  });
+  function setTab(tab) {
+    if (!tabButtons.some(b => b.dataset.tab === tab)) tab = 'projekte';
+    tabButtons.forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+    cards().forEach(c => { c.hidden = gruppe(c) !== tab; });
+    document.querySelectorAll('[data-info]').forEach(p => { p.hidden = p.dataset.info !== tab; });
+    save(TAB_KEY, tab === 'projekte' ? null : tab);
+  }
+  setTab(location.hash.slice(1) || load(TAB_KEY) || 'projekte');
+  tabButtons.forEach(b => b.addEventListener('click', () => {
+    setTab(b.dataset.tab);
+    history.replaceState(null, '', b.dataset.tab === 'projekte' ? location.pathname : '#' + b.dataset.tab);
+  }));
+  window.addEventListener('hashchange', () => setTab(location.hash.slice(1)));
 
   // Kompakte Ansicht
   function setCompact(on) {
